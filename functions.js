@@ -5,9 +5,9 @@ Office.onReady((info) => {
         document.getElementById("btn1stLevelBullet").onclick = apply1stLevelBullet;
         document.getElementById("btn2ndLevelBullet").onclick = apply2ndLevelBullet;
         
-        // This single event listener now handles 0, 1x, 2x, 3x, and 4x
-        document.querySelectorAll(".toggle-btn").forEach(btn => {
-            btn.addEventListener('click', handleSpaceToggleClick);
+        // Listeners for all the space buttons (0, 1x, 2x, etc.)
+        document.querySelectorAll(".space-btn").forEach(btn => {
+            btn.addEventListener('click', handleSpaceButtonClick);
         });
 
         console.log("SmartFormat Add-in is ready.");
@@ -38,24 +38,16 @@ async function apply2ndLevelBullet() {
     });
 }
 
-// Universal handler for the toggle buttons (including 0)
-function handleSpaceToggleClick(event) {
+// Handler for the simple space action buttons
+function handleSpaceButtonClick(event) {
     const currentGroup = event.target.parentElement;
     
-    // Remove selected state from whichever button is currently active in this row
-    const currentlySelected = currentGroup.querySelector(".toggle-btn.selected");
-    if (currentlySelected) {
-        currentlySelected.classList.remove("selected");
-    }
-    
-    // Add selected state to the button you just clicked
-    event.target.classList.add("selected");
-    
-    // Check if we are in the Before or After row
-    const isBefore = currentGroup.querySelector("button").id.includes("btnBefore");
+    // Check if we are in the Before or After row based on the button ID
+    const isBefore = event.target.id.includes("btnBefore");
     const multiplier = event.target.textContent;
     
-    console.log(`Setting ${isBefore ? "Before" : "After"} space to: ${multiplier}`);
+    // This is where we will hook up your VBA logic
+    console.log(`Applying ${isBefore ? "Before" : "After"} space: ${multiplier}`);
 }
 
 async function runPowerPointCommand(callback) {
