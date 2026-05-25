@@ -99,12 +99,6 @@ button:hover {
     height: 28px;
 }
 
-.zero-btn {
-    height: 100%;
-    padding: 0 10px;
-    box-sizing: border-box;
-}
-
 .toggle-group {
     display: flex;
     gap: 4px;
