@@ -91,10 +91,41 @@ button:hover {
     height: auto;
 }
 
+/* Height synchronization for inputs and buttons */
+.space-control-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 28px;
+}
+
+.zero-btn {
+    height: 100%;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
+
+.toggle-group {
+    display: flex;
+    gap: 4px;
+    height: 100%;
+}
+
+.toggle-btn {
+    height: 100%;
+    padding: 0 8px;
+    box-sizing: border-box;
+}
+
+.toggle-btn.selected {
+    border-color: #6aabfc;
+}
+
 .spinner-container {
     display: flex;
     align-items: center;
     gap: 4px;
+    height: 28px;
 }
 
 .num-input {
@@ -102,31 +133,14 @@ button:hover {
     color: white;
     border: 1px solid #999999;
     border-radius: 4px;
-    padding: 2px;
-    width: 40px;
-    text-align: right;
+    padding: 0 6px;
+    width: 45px;
+    height: 100%;
+    box-sizing: border-box;
+    text-align: left;
 }
 
 .unit {
     color: #b3b3b3;
     font-size: 0.8rem;
-}
-
-.space-control-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.toggle-group {
-    display: flex;
-    gap: 4px;
-}
-
-.toggle-btn {
-    padding: 2px 6px;
-}
-
-.toggle-btn.selected {
-    border-color: #6aabfc;
 }
