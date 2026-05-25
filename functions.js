@@ -7,10 +7,14 @@ Office.onReady((info) => {
         document.getElementById("btn1stLevelBullet").onclick = apply1stLevelBullet;
         document.getElementById("btn2ndLevelBullet").onclick = apply2ndLevelBullet;
         
-        // Add events for space controls
+        // Add events for space multipliers (1x-4x)
         document.querySelectorAll(".toggle-btn").forEach(btn => {
             btn.addEventListener('click', handleSpaceToggleClick);
         });
+
+        // Add events for independent Zero buttons
+        document.getElementById("btnBefore0").onclick = () => handleZeroClick("Before");
+        document.getElementById("btnAfter0").onclick = () => handleZeroClick("After");
         
         console.log("SmartFormat Add-in is ready.");
     }
@@ -22,50 +26,62 @@ Office.onReady((info) => {
 
 async function runFixBrand() {
     await runPowerPointCommand(async (context) => {
-        // Place VBA 'Fix Brand Text/Color' logic here using Office.js
         console.log("Running Fix Brand command...");
     });
 }
 
 async function runZeroMargin() {
     await runPowerPointCommand(async (context) => {
-        // Place VBA 'Zero Margin' logic here using Office.js
         console.log("Setting Zero Margin...");
     });
 }
 
 async function apply1stLevelBullet() {
     await runPowerPointCommand(async (context) => {
-        // Place VBA 'Apply 1st Level Bullet' logic here using Office.js
         console.log("Applying 1st Level Bullet...");
     });
 }
 
 async function apply2ndLevelBullet() {
     await runPowerPointCommand(async (context) => {
-        // Place VBA 'Apply 2nd Level Bullet' logic here using Office.js
         console.log("Applying 2nd Level Bullet...");
     });
 }
 
-// Handler for toggle buttons (0, 1x, 2x, etc.)
+// Handler for toggle buttons (1x, 2x, etc.)
 function handleSpaceToggleClick(event) {
-    // 1. Visually update selected state
     const currentGroup = event.target.parentElement;
-    currentGroup.querySelector(".toggle-btn.selected").classList.remove("selected");
+    
+    // Remove selected state from siblings in this group
+    const currentlySelected = currentGroup.querySelector(".toggle-btn.selected");
+    if (currentlySelected) {
+        currentlySelected.classList.remove("selected");
+    }
+    
+    // Add selected state to clicked button
     event.target.classList.add("selected");
     
-    // 2. Identify the type (Before or After)
-    const isBefore = currentGroup.id.includes("btnBefore");
+    // Identify the type (Before or After)
+    const isBefore = currentGroup.querySelector("button").id.includes("btnBefore");
     const multiplier = event.target.textContent;
     
-    // 3. Trigger PowerPoint logic (Placeholder)
     console.log(`Setting ${isBefore ? "Before" : "After"} space with multiplier: ${multiplier}`);
+}
+
+// Handler for the independent 0 buttons
+function handleZeroClick(type) {
+    // Clear any active toggles in the corresponding row
+    const toggleGroup = document.querySelector(`#btn${type}1x`).parentElement;
+    const currentlySelected = toggleGroup.querySelector(".toggle-btn.selected");
+    if (currentlySelected) {
+        currentlySelected.classList.remove("selected");
+    }
+
+    console.log(`Resetting ${type} space to 0`);
 }
 
 /**
  * --- Office.js Context Wrapper ---
- * Standard boiler plate to handle PowerPoint context execution.
  */
 async function runPowerPointCommand(callback) {
     try {
