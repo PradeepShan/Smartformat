@@ -1,0 +1,132 @@
+body {
+    background-color: #3f3f3f;
+    color: #e6e6e6;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    margin: 0;
+    padding: 12px;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#content-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.header {
+    margin-bottom: 20px;
+}
+
+.smartformat-title {
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.command-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin: 12px 0 8px 0;
+    color: #b3b3b3;
+}
+
+button {
+    background-color: transparent;
+    color: #e6e6e6;
+    border: 1.5px solid #a1a1a1;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-align: center;
+}
+
+button:hover {
+    border-color: #f1f1f1;
+}
+
+.large-button {
+    width: 100%;
+}
+
+.grid-2x2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.divider {
+    border: 0;
+    border-top: 1px solid #707070;
+    margin: 16px 0;
+    width: 100%;
+}
+
+.icon-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.icon-button {
+    padding: 4px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.icon-button img {
+    max-width: 20px;
+    height: auto;
+}
+
+.spinner-container {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.num-input {
+    background-color: #555555;
+    color: white;
+    border: 1px solid #999999;
+    border-radius: 4px;
+    padding: 2px;
+    width: 40px;
+    text-align: right;
+}
+
+.unit {
+    color: #b3b3b3;
+    font-size: 0.8rem;
+}
+
+.space-control-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.toggle-group {
+    display: flex;
+    gap: 4px;
+}
+
+.toggle-btn {
+    padding: 2px 6px;
+}
+
+.toggle-btn.selected {
+    border-color: #6aabfc;
+}
