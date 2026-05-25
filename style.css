@@ -99,20 +99,16 @@ button:hover {
     height: 28px;
 }
 
-.toggle-group {
+.button-group {
     display: flex;
     gap: 4px;
     height: 100%;
 }
 
-.toggle-btn {
+.space-btn {
     height: 100%;
     padding: 0 8px;
     box-sizing: border-box;
-}
-
-.toggle-btn.selected {
-    border-color: #6aabfc;
 }
 
 .spinner-container {
@@ -128,7 +124,7 @@ button:hover {
     border: 1px solid #999999;
     border-radius: 4px;
     padding: 0 6px;
-    width: 45px;
+    width: 65px; /* Increased from 45px */
     height: 100%;
     box-sizing: border-box;
     text-align: left;
