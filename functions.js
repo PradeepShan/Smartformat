@@ -1,28 +1,18 @@
-// Initialize the add-in
 Office.onReady((info) => {
     if (info.host === Office.HostType.PowerPoint) {
-        // Find elements and add click events
         document.getElementById("btnFixBrand").onclick = runFixBrand;
         document.getElementById("btnZeroMargin").onclick = runZeroMargin;
         document.getElementById("btn1stLevelBullet").onclick = apply1stLevelBullet;
         document.getElementById("btn2ndLevelBullet").onclick = apply2ndLevelBullet;
         
-        // Add events for space multipliers (1x-4x)
+        // This single event listener now handles 0, 1x, 2x, 3x, and 4x
         document.querySelectorAll(".toggle-btn").forEach(btn => {
             btn.addEventListener('click', handleSpaceToggleClick);
         });
 
-        // Add events for independent Zero buttons
-        document.getElementById("btnBefore0").onclick = () => handleZeroClick("Before");
-        document.getElementById("btnAfter0").onclick = () => handleZeroClick("After");
-        
         console.log("SmartFormat Add-in is ready.");
     }
 });
-
-/**
- * --- Migrated Function Placeholders ---
- */
 
 async function runFixBrand() {
     await runPowerPointCommand(async (context) => {
@@ -48,41 +38,26 @@ async function apply2ndLevelBullet() {
     });
 }
 
-// Handler for toggle buttons (1x, 2x, etc.)
+// Universal handler for the toggle buttons (including 0)
 function handleSpaceToggleClick(event) {
     const currentGroup = event.target.parentElement;
     
-    // Remove selected state from siblings in this group
+    // Remove selected state from whichever button is currently active in this row
     const currentlySelected = currentGroup.querySelector(".toggle-btn.selected");
     if (currentlySelected) {
         currentlySelected.classList.remove("selected");
     }
     
-    // Add selected state to clicked button
+    // Add selected state to the button you just clicked
     event.target.classList.add("selected");
     
-    // Identify the type (Before or After)
+    // Check if we are in the Before or After row
     const isBefore = currentGroup.querySelector("button").id.includes("btnBefore");
     const multiplier = event.target.textContent;
     
-    console.log(`Setting ${isBefore ? "Before" : "After"} space with multiplier: ${multiplier}`);
+    console.log(`Setting ${isBefore ? "Before" : "After"} space to: ${multiplier}`);
 }
 
-// Handler for the independent 0 buttons
-function handleZeroClick(type) {
-    // Clear any active toggles in the corresponding row
-    const toggleGroup = document.querySelector(`#btn${type}1x`).parentElement;
-    const currentlySelected = toggleGroup.querySelector(".toggle-btn.selected");
-    if (currentlySelected) {
-        currentlySelected.classList.remove("selected");
-    }
-
-    console.log(`Resetting ${type} space to 0`);
-}
-
-/**
- * --- Office.js Context Wrapper ---
- */
 async function runPowerPointCommand(callback) {
     try {
         await PowerPoint.run(callback);
