@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartFormat</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Load Office.js from CDN -->
+    <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js" type="text/javascript"></script>
+</head>
+<body class="ms-font-m">
+    <div id="content-main" class="ms-welcome">
+        
+        <!-- Header -->
+        <header class="header">
+            <h1 class="smartformat-title">SmartFormat</h1>
+        </header>
+        
+        <!-- Quick Fix Section -->
+        <div class="command-group">
+            <button id="btnFixBrand" class="large-button">Fix Brand's Text and Color</button>
+            <div class="grid-2x2">
+                <button id="btnThemeFont">Fix Theme Font</button>
+                <button id="btnThemeColor">Fix Theme Color</button>
+                <button id="btnMerge">Merge</button>
+                <button id="btnZeroMargin">Zero Margin</button>
+            </div>
+            <div class="grid-2x2">
+                <button id="btn1stLevelBullet">1st Level Bullet</button>
+                <button id="btn2ndLevelBullet">2nd Level Bullet</button>
+            </div>
+        </div>
+        
+        <hr class="divider"/>
+        
+        <!-- Textbox properties -->
+        <h2 class="section-title">Textbox properties</h2>
+        <div class="grid-2x2">
+            <button id="btnCopy">Copy</button>
+            <button id="btnPaste">Paste</button>
+        </div>
+        
+        <hr class="divider"/>
+        
+        <!-- Align Section -->
+        <h2 class="section-title">Align</h2>
+        <div class="icon-row align-icons">
+            <button id="btnAlignLeft" class="icon-button"><img src="icon-placeholder.png" alt="Align Left"/></button>
+            <button id="btnAlignRight" class="icon-button"><img src="icon-placeholder.png" alt="Align Right"/></button>
+            <button id="btnAlignTop" class="icon-button"><img src="icon-placeholder.png" alt="Align Top"/></button>
+            <button id="btnAlignBottom" class="icon-button"><img src="icon-placeholder.png" alt="Align Bottom"/></button>
+            <button id="btnAlignCenterV" class="icon-button"><img src="icon-placeholder.png" alt="Align Center V"/></button>
+            <button id="btnAlignCenterH" class="icon-button"><img src="icon-placeholder.png" alt="Align Center H"/></button>
+            <button id="btnAlignMiddle" class="icon-button"><img src="icon-placeholder.png" alt="Align Middle"/></button>
+        </div>
+        
+        <!-- Distribute Section -->
+        <h2 class="section-title">Distribute</h2>
+        <div class="icon-row distribute-icons">
+            <button id="btnDistributeH" class="icon-button"><img src="icon-placeholder.png" alt="Distribute H"/></button>
+            <button id="btnDistributeV" class="icon-button"><img src="icon-placeholder.png" alt="Distribute V"/></button>
+            <button id="btnGroup" class="icon-button"><img src="icon-placeholder.png" alt="Group"/></button>
+            <button id="btnUngroup" class="icon-button"><img src="icon-placeholder.png" alt="Ungroup"/></button>
+            <div class="spinner-container">
+                <input type="number" id="numDistributeValue" value="0" min="0" step="0.1" class="num-input">
+                <span class="unit">cm</span>
+            </div>
+        </div>
+        
+        <hr class="divider"/>
+        
+        <!-- Before Space Section -->
+        <h2 class="section-title">Before Space</h2>
+        <div class="space-control-row">
+            <div class="toggle-group">
+                <button id="btnBefore0" class="toggle-btn selected">0</button>
+                <button id="btnBefore1x" class="toggle-btn">1x</button>
+                <button id="btnBefore2x" class="toggle-btn">2x</button>
+                <button id="btnBefore3x" class="toggle-btn">3x</button>
+                <button id="btnBefore4x" class="toggle-btn">4x</button>
+            </div>
+            <div class="spinner-container">
+                <input type="number" id="numBeforeValue" value="0" min="0" step="0.5" class="num-input">
+            </div>
+        </div>
+        
+        <!-- After Space Section -->
+        <h2 class="section-title">After Space</h2>
+        <div class="space-control-row">
+            <div class="toggle-group">
+                <button id="btnAfter0" class="toggle-btn selected">0</button>
+                <button id="btnAfter1x" class="toggle-btn">1x</button>
+                <button id="btnAfter2x" class="toggle-btn">2x</button>
+                <button id="btnAfter3x" class="toggle-btn">3x</button>
+                <button id="btnAfter4x" class="toggle-btn">4x</button>
+            </div>
+            <div class="spinner-container">
+                <input type="number" id="numAfterValue" value="0" min="0" step="0.5" class="num-input">
+            </div>
+        </div>
+        
+    </div>
+    <script src="functions.js"></script>
+</body>
+</html>
