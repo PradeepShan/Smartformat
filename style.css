@@ -21,7 +21,7 @@ body {
 }
 
 .smartformat-title {
-    font-size: 1.6rem;
+    font-size: 1rem;
     font-weight: 600;
     margin: 0;
 }
@@ -33,7 +33,7 @@ body {
 }
 
 .section-title {
-    font-size: 1.1rem;
+    font-size: .75rem;
     font-weight: 500;
     margin: 12px 0 8px 0;
     color: #b3b3b3;
