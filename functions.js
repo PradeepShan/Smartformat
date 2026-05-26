@@ -1,3 +1,46 @@
+// --- ON-SCREEN CONSOLE OVERRIDE ---
+const uiConsole = document.getElementById('on-screen-console');
+
+function printToUI(message, isError = false) {
+    if (!uiConsole) return;
+    
+    // Convert objects to readable strings
+    if (typeof message === 'object') {
+        message = JSON.stringify(message, null, 2);
+    }
+
+    const msgDiv = document.createElement('div');
+    msgDiv.className = isError ? 'log-err' : 'log-msg';
+    msgDiv.textContent = `> ${message}`;
+    
+    uiConsole.appendChild(msgDiv);
+    
+    // Auto-scroll to the bottom so the newest logs are visible
+    uiConsole.scrollTop = uiConsole.scrollHeight;
+}
+
+// Store the original console functions
+const originalLog = console.log;
+const originalError = console.error;
+
+// Override log
+console.log = function(...args) {
+    originalLog.apply(console, args); // Keep native behavior
+    printToUI(args.join(' '));        // Print to our UI
+};
+
+// Override error
+console.error = function(...args) {
+    originalError.apply(console, args); // Keep native behavior
+    printToUI(args.join(' '), true);    // Print to our UI in red
+};
+// --- END CONSOLE OVERRIDE ---
+
+
+// Your existing Office.onReady code goes here...
+Office.onReady((info) => {
+    if (info.host === Office.HostType.PowerPoint) {
+// ...
 Office.onReady((info) => {
     if (info.host === Office.HostType.PowerPoint) {
         document.getElementById("btnFixBrand").onclick = runFixBrand;
