@@ -4,9 +4,8 @@ const uiConsole = document.getElementById('on-screen-console');
 function printToUI(message, isError = false) {
     if (!uiConsole) return;
     
-    // Convert objects to readable strings
     if (typeof message === 'object') {
-        message = JSON.stringify(message, null, 2);
+        try { message = JSON.stringify(message, null, 2); } catch(e) { message = String(message); }
     }
 
     const msgDiv = document.createElement('div');
@@ -14,35 +13,30 @@ function printToUI(message, isError = false) {
     msgDiv.textContent = `> ${message}`;
     
     uiConsole.appendChild(msgDiv);
-    
-    // Auto-scroll to the bottom so the newest logs are visible
     uiConsole.scrollTop = uiConsole.scrollHeight;
 }
 
-// Store the original console functions
 const originalLog = console.log;
 const originalError = console.error;
 
-// Override log
 console.log = function(...args) {
-    originalLog.apply(console, args); // Keep native behavior
-    printToUI(args.join(' '));        // Print to our UI
+    originalLog.apply(console, args);
+    printToUI(args.join(' '));
 };
 
-// Override error
 console.error = function(...args) {
-    originalError.apply(console, args); // Keep native behavior
-    printToUI(args.join(' '), true);    // Print to our UI in red
+    originalError.apply(console, args);
+    printToUI(args.join(' '), true);
 };
 // --- END CONSOLE OVERRIDE ---
 
+// Immediate test log to prove the file loaded
+console.log("Functions.js version 2 successfully loaded!");
 
-// Your existing Office.onReady code goes here...
 Office.onReady((info) => {
     if (info.host === Office.HostType.PowerPoint) {
-// ...
-Office.onReady((info) => {
-    if (info.host === Office.HostType.PowerPoint) {
+        console.log("Office.js is ready. Attaching button events...");
+        
         document.getElementById("btnFixBrand").onclick = runFixBrand;
         document.getElementById("btnZeroMargin").onclick = runZeroMargin;
         document.getElementById("btn1stLevelBullet").onclick = apply1stLevelBullet;
