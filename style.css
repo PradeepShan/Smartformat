@@ -96,7 +96,7 @@ button:hover {
     display: flex;
     align-items: center;
     gap: 8px;
-    height: 28px;
+    height: 36px;
 }
 
 .button-group {
@@ -115,7 +115,7 @@ button:hover {
     display: flex;
     align-items: center;
     gap: 4px;
-    height: 28px;
+    height: 36px;
 }
 
 .num-input {
