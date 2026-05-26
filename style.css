@@ -45,7 +45,7 @@ button {
     border: 1.5px solid #a1a1a1;
     border-radius: 6px;
     padding: 6px 12px;
-    font-size: 0.9rem;
+    font-size: 0.6rem;
     cursor: pointer;
     text-align: center;
 }
@@ -132,5 +132,5 @@ button:hover {
 
 .unit {
     color: #b3b3b3;
-    font-size: 0.8rem;
+    font-size: 0.6rem;
 }
