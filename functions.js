@@ -58,11 +58,36 @@ async function runFixBrand() {
 }
 
 async function runZeroMargin() {
-    await runPowerPointCommand(async (context) => {
-        console.log("Setting Zero Margin...");
+    console.log("Running Zero Margin...");
+    await PowerPoint.run(async (context) => {
+        const selectedShapes = context.presentation.getSelectedShapes();
+        
+        // Load the textFrame properties so we can modify the margins
+        selectedShapes.load("items/textFrame");
+        await context.sync();
+
+        if (selectedShapes.items.length === 0) {
+            console.log("No shapes selected. Please select a textbox.");
+            return;
+        }
+
+        selectedShapes.items.forEach(shape => {
+            if (shape.textFrame) {
+                // PowerPoint API margins are measured in points
+                shape.textFrame.leftMargin = 0;
+                shape.textFrame.rightMargin = 0;
+                shape.textFrame.topMargin = 0;
+                shape.textFrame.bottomMargin = 0;
+            }
+        });
+
+        await context.sync();
+        console.log("Zero margins applied successfully!");
+        
+    }).catch(function (error) {
+        console.error("Error setting margins: " + error);
     });
 }
-
 async function apply1stLevelBullet() {
     await runPowerPointCommand(async (context) => {
         console.log("Applying 1st Level Bullet...");
