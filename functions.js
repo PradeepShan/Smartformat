@@ -149,10 +149,11 @@ async function runAlign(actionId) {
                     shape.top = keyShape.top + keyShape.height - shape.height;
                     break;
                 case 'btnAlignCenterH': // Centers ONLY Horizontally
-                    shape.left = keyShape.left + (keyShape.width / 2) - (shape.width / 2);
+                   shape.top = keyShape.top + (keyShape.height / 2) - (shape.height / 2);
                     break;
                 case 'btnAlignCenterV': // Centers ONLY Vertically
-                    shape.top = keyShape.top + (keyShape.height / 2) - (shape.height / 2);
+                     shape.left = keyShape.left + (keyShape.width / 2) - (shape.width / 2);
+                    
                     break;
                 case 'btnAlignMiddle': // Centers BOTH Horizontally and Vertically
                     shape.left = keyShape.left + (keyShape.width / 2) - (shape.width / 2);
