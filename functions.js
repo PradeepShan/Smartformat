@@ -41,6 +41,9 @@ Office.onReady((info) => {
         document.getElementById("btnZeroMargin").onclick = runZeroMargin;
         document.getElementById("btn1stLevelBullet").onclick = apply1stLevelBullet;
         document.getElementById("btn2ndLevelBullet").onclick = apply2ndLevelBullet;
+        // Textbox Properties (Copy / Paste)
+        document.getElementById("btnCopy").onclick = runCopy;
+        document.getElementById("btnPaste").onclick = runPaste;
 
 // Add this line to your Office.onReady block, replacing the old alignIds array:
 const alignIds = ['btnAlignLeft', 'btnAlignCenterH', 'btnAlignCenterV', 'btnAlignRight', 'btnAlignTop', 'btnAlignBottom', 'btnAlignMiddle'];
@@ -241,7 +244,94 @@ async function runDistribute(actionId) {
         await context.sync();
         console.log("Distribution complete.");
     }).catch(error => console.error(error));
+
 }
+// --- COPY & PASTE LOGIC ---
+
+// Global variable to hold the copied formatting in memory
+let clipboardShapeFormat = null;
+
+async function runCopy() {
+    await PowerPoint.run(async (context) => {
+        const selectedShapes = context.presentation.getSelectedShapes();
+        
+        // Load dimensions and text formatting
+        selectedShapes.load("items/width, items/height, items/textFrame/textRange/font");
+        await context.sync();
+
+        if (selectedShapes.items.length === 0) {
+            console.log("Please select a shape to copy its format.");
+            return;
+        }
+
+        // We only copy from the first selected shape
+        const shape = selectedShapes.items[0];
+
+        // Save dimensions to our temporary clipboard
+        clipboardShapeFormat = {
+            width: shape.width,
+            height: shape.height,
+            font: null
+        };
+
+        // If the shape has text, save the font properties too
+        if (shape.textFrame && shape.textFrame.textRange && shape.textFrame.textRange.font) {
+            const font = shape.textFrame.textRange.font;
+            clipboardShapeFormat.font = {
+                name: font.name,
+                size: font.size,
+                color: font.color,
+                bold: font.bold,
+                italic: font.italic
+            };
+        }
+
+        console.log("Format copied to clipboard!");
+    }).catch(error => console.error(error));
+}
+
+async function runPaste() {
+    if (!clipboardShapeFormat) {
+        console.log("Clipboard is empty. Copy a shape first.");
+        return;
+    }
+
+    await PowerPoint.run(async (context) => {
+        const selectedShapes = context.presentation.getSelectedShapes();
+        selectedShapes.load("items/textFrame/textRange/font");
+        await context.sync();
+
+        if (selectedShapes.items.length === 0) {
+            console.log("Select a target shape to paste formatting.");
+            return;
+        }
+
+        console.log("Pasting format to selected shape(s)...");
+
+        // Loop through all selected shapes and apply the saved formatting
+        selectedShapes.items.forEach(shape => {
+            // Apply dimensions
+            shape.width = clipboardShapeFormat.width;
+            shape.height = clipboardShapeFormat.height;
+
+            // Apply font properties if they exist in the clipboard AND the target shape has text
+            if (clipboardShapeFormat.font && shape.textFrame && shape.textFrame.textRange) {
+                const targetFont = shape.textFrame.textRange.font;
+                const srcFont = clipboardShapeFormat.font;
+                
+                targetFont.name = srcFont.name;
+                targetFont.size = srcFont.size;
+                targetFont.color = srcFont.color;
+                targetFont.bold = srcFont.bold;
+                targetFont.italic = srcFont.italic;
+            }
+        });
+
+        await context.sync();
+        console.log("Format pasted successfully!");
+    }).catch(error => console.error(error));
+}
+
 // Handler for the simple space action buttons
 // Universal handler for all space buttons (Before & After)
 async function handleSpaceButtonClick(event) {
