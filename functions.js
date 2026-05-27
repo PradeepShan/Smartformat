@@ -42,8 +42,8 @@ Office.onReady((info) => {
         document.getElementById("btn1stLevelBullet").onclick = apply1stLevelBullet;
         document.getElementById("btn2ndLevelBullet").onclick = apply2ndLevelBullet;
 
-        // Align Buttons
-        const alignIds = ['btnAlignLeft', 'btnAlignCenterH', 'btnAlignRight', 'btnAlignTop', 'btnAlignMiddle', 'btnAlignBottom'];
+// Add this line to your Office.onReady block, replacing the old alignIds array:
+const alignIds = ['btnAlignLeft', 'btnAlignCenterH', 'btnAlignCenterV', 'btnAlignRight', 'btnAlignTop', 'btnAlignBottom', 'btnAlignMiddle'];
         alignIds.forEach(id => {
             document.getElementById(id).onclick = () => runAlign(id);
         });
@@ -111,11 +111,12 @@ async function apply2ndLevelBullet() {
         console.log("Applying 2nd Level Bullet...");
     });
 }
+
+
 // --- ALIGNMENT LOGIC ---
 async function runAlign(actionId) {
     await PowerPoint.run(async (context) => {
         const selectedShapes = context.presentation.getSelectedShapes();
-        // Load the geometry properties
         selectedShapes.load("items/left, items/top, items/width, items/height");
         await context.sync();
 
@@ -125,11 +126,10 @@ async function runAlign(actionId) {
         }
 
         const shapes = selectedShapes.items;
-        // In JS, the array is ordered back-to-front. 
-        // shapes[shapes.length - 1] is the front-most object (our Key Object).
+        // Key Object is the front-most shape (Z-Index Front)
         const keyShape = shapes[shapes.length - 1];
 
-        console.log(`Aligning to Key Object (Z-Index Front). Action: ${actionId}`);
+        console.log(`Aligning to Key Object. Action: ${actionId}`);
 
         // Loop through all shapes EXCEPT the key shape and align them
         for (let i = 0; i < shapes.length - 1; i++) {
@@ -139,20 +139,24 @@ async function runAlign(actionId) {
                 case 'btnAlignLeft':
                     shape.left = keyShape.left;
                     break;
-                case 'btnAlignCenterH': // Vertical axis alignment
-                    shape.left = keyShape.left + (keyShape.width / 2) - (shape.width / 2);
-                    break;
                 case 'btnAlignRight':
                     shape.left = keyShape.left + keyShape.width - shape.width;
                     break;
                 case 'btnAlignTop':
                     shape.top = keyShape.top;
                     break;
-                case 'btnAlignMiddle': // Horizontal axis alignment
-                    shape.top = keyShape.top + (keyShape.height / 2) - (shape.height / 2);
-                    break;
                 case 'btnAlignBottom':
                     shape.top = keyShape.top + keyShape.height - shape.height;
+                    break;
+                case 'btnAlignCenterH': // Centers ONLY Horizontally
+                    shape.left = keyShape.left + (keyShape.width / 2) - (shape.width / 2);
+                    break;
+                case 'btnAlignCenterV': // Centers ONLY Vertically
+                    shape.top = keyShape.top + (keyShape.height / 2) - (shape.height / 2);
+                    break;
+                case 'btnAlignMiddle': // Centers BOTH Horizontally and Vertically
+                    shape.left = keyShape.left + (keyShape.width / 2) - (shape.width / 2);
+                    shape.top = keyShape.top + (keyShape.height / 2) - (shape.height / 2);
                     break;
             }
         }
