@@ -41,6 +41,18 @@ Office.onReady((info) => {
         document.getElementById("btnZeroMargin").onclick = runZeroMargin;
         document.getElementById("btn1stLevelBullet").onclick = apply1stLevelBullet;
         document.getElementById("btn2ndLevelBullet").onclick = apply2ndLevelBullet;
+
+        // Align Buttons
+        const alignIds = ['btnAlignLeft', 'btnAlignCenterH', 'btnAlignRight', 'btnAlignTop', 'btnAlignMiddle', 'btnAlignBottom'];
+        alignIds.forEach(id => {
+            document.getElementById(id).onclick = () => runAlign(id);
+        });
+
+        // Distribute Buttons
+        const distIds = ['btnDistributeH', 'btnDistributeV', 'btnDistributeSpacingH', 'btnDistributeSpacingV'];
+        distIds.forEach(id => {
+            document.getElementById(id).onclick = () => runDistribute(id);
+        });
         
         // Listeners for all the space buttons (0, 1x, 2x, etc.)
         document.querySelectorAll(".space-btn").forEach(btn => {
@@ -99,7 +111,132 @@ async function apply2ndLevelBullet() {
         console.log("Applying 2nd Level Bullet...");
     });
 }
+// --- ALIGNMENT LOGIC ---
+async function runAlign(actionId) {
+    await PowerPoint.run(async (context) => {
+        const selectedShapes = context.presentation.getSelectedShapes();
+        // Load the geometry properties
+        selectedShapes.load("items/left, items/top, items/width, items/height");
+        await context.sync();
 
+        if (selectedShapes.items.length < 2) {
+            console.log("Please select at least 2 shapes to align.");
+            return;
+        }
+
+        const shapes = selectedShapes.items;
+        // In JS, the array is ordered back-to-front. 
+        // shapes[shapes.length - 1] is the front-most object (our Key Object).
+        const keyShape = shapes[shapes.length - 1];
+
+        console.log(`Aligning to Key Object (Z-Index Front). Action: ${actionId}`);
+
+        // Loop through all shapes EXCEPT the key shape and align them
+        for (let i = 0; i < shapes.length - 1; i++) {
+            const shape = shapes[i];
+
+            switch (actionId) {
+                case 'btnAlignLeft':
+                    shape.left = keyShape.left;
+                    break;
+                case 'btnAlignCenterH': // Vertical axis alignment
+                    shape.left = keyShape.left + (keyShape.width / 2) - (shape.width / 2);
+                    break;
+                case 'btnAlignRight':
+                    shape.left = keyShape.left + keyShape.width - shape.width;
+                    break;
+                case 'btnAlignTop':
+                    shape.top = keyShape.top;
+                    break;
+                case 'btnAlignMiddle': // Horizontal axis alignment
+                    shape.top = keyShape.top + (keyShape.height / 2) - (shape.height / 2);
+                    break;
+                case 'btnAlignBottom':
+                    shape.top = keyShape.top + keyShape.height - shape.height;
+                    break;
+            }
+        }
+
+        await context.sync();
+        console.log("Alignment complete.");
+    }).catch(error => console.error(error));
+}
+
+// --- DISTRIBUTE LOGIC ---
+async function runDistribute(actionId) {
+    await PowerPoint.run(async (context) => {
+        const selectedShapes = context.presentation.getSelectedShapes();
+        selectedShapes.load("items/left, items/top, items/width, items/height");
+        await context.sync();
+
+        if (selectedShapes.items.length < 3 && (actionId === 'btnDistributeH' || actionId === 'btnDistributeV')) {
+            console.log("Standard Distribute requires at least 3 shapes.");
+            return;
+        }
+
+        // We must copy the API array into a standard array so we can sort it physically
+        let shapes = [...selectedShapes.items];
+
+        // 1 cm = 28.3465 points
+        const cmToPt = 28.3465;
+        const inputValueCm = parseFloat(document.getElementById("numDistributeValue").value);
+        const exactGapPt = inputValueCm * cmToPt;
+
+        console.log(`Running Distribution: ${actionId}`);
+
+        if (actionId === 'btnDistributeH' || actionId === 'btnDistributeSpacingH') {
+            // Sort shapes from Left to Right
+            shapes.sort((a, b) => a.left - b.left);
+
+            if (actionId === 'btnDistributeSpacingH') {
+                // Exact Custom Spacing
+                console.log(`Spacing H exactly by ${inputValueCm} cm (${exactGapPt.toFixed(2)} pt)`);
+                for (let i = 1; i < shapes.length; i++) {
+                    shapes[i].left = shapes[i-1].left + shapes[i-1].width + exactGapPt;
+                }
+            } else {
+                // Standard Even Distribute between outer bounds
+                let totalShapeWidth = 0;
+                shapes.forEach(s => totalShapeWidth += s.width);
+                
+                const totalSpan = (shapes[shapes.length - 1].left + shapes[shapes.length - 1].width) - shapes[0].left;
+                const emptySpace = totalSpan - totalShapeWidth;
+                const gap = emptySpace / (shapes.length - 1);
+
+                for (let i = 1; i < shapes.length - 1; i++) {
+                    shapes[i].left = shapes[i-1].left + shapes[i-1].width + gap;
+                }
+            }
+        } 
+        else if (actionId === 'btnDistributeV' || actionId === 'btnDistributeSpacingV') {
+            // Sort shapes from Top to Bottom
+            shapes.sort((a, b) => a.top - b.top);
+
+            if (actionId === 'btnDistributeSpacingV') {
+                // Exact Custom Spacing
+                console.log(`Spacing V exactly by ${inputValueCm} cm (${exactGapPt.toFixed(2)} pt)`);
+                for (let i = 1; i < shapes.length; i++) {
+                    shapes[i].top = shapes[i-1].top + shapes[i-1].height + exactGapPt;
+                }
+            } else {
+                // Standard Even Distribute between outer bounds
+                let totalShapeHeight = 0;
+                shapes.forEach(s => totalShapeHeight += s.height);
+                
+                const totalSpan = (shapes[shapes.length - 1].top + shapes[shapes.length - 1].height) - shapes[0].top;
+                const emptySpace = totalSpan - totalShapeHeight;
+                const gap = emptySpace / (shapes.length - 1);
+
+                for (let i = 1; i < shapes.length - 1; i++) {
+                    shapes[i].top = shapes[i-1].top + shapes[i-1].height + gap;
+                }
+            }
+        }
+
+        await context.sync();
+        console.log("Distribution complete.");
+    }).catch(error => console.error(error));
+}
 // Handler for the simple space action buttons
 // Universal handler for all space buttons (Before & After)
 async function handleSpaceButtonClick(event) {
