@@ -246,7 +246,7 @@ async function runDistribute(actionId) {
     }).catch(error => console.error(error));
 
 }
-// --- COPY & PASTE LOGIC ---
+// --- EXTENDED COPY & PASTE LOGIC ---
 
 // Global variable to hold the copied formatting in memory
 let clipboardShapeFormat = null;
@@ -255,8 +255,9 @@ async function runCopy() {
     await PowerPoint.run(async (context) => {
         const selectedShapes = context.presentation.getSelectedShapes();
         
-        // Load dimensions and text formatting
-        selectedShapes.load("items/width, items/height, items/textFrame/textRange/font");
+        // Load ALL the structural properties we need
+        selectedShapes.load("items/left, items/top, items/width, items/height, items/textFrame/leftMargin, items/textFrame/rightMargin, items/textFrame/topMargin, items/textFrame/bottomMargin, items/textFrame/verticalAlignment, items/textFrame/autoSizeSetting, items/textFrame/wordWrap, items/textFrame/textRange/font");
+        
         await context.sync();
 
         if (selectedShapes.items.length === 0) {
@@ -267,27 +268,43 @@ async function runCopy() {
         // We only copy from the first selected shape
         const shape = selectedShapes.items[0];
 
-        // Save dimensions to our temporary clipboard
+        // 1. Save layout and exact position
         clipboardShapeFormat = {
+            left: shape.left,
+            top: shape.top,
             width: shape.width,
             height: shape.height,
+            textFrame: null,
             font: null
         };
 
-        // If the shape has text, save the font properties too
-        if (shape.textFrame && shape.textFrame.textRange && shape.textFrame.textRange.font) {
-            const font = shape.textFrame.textRange.font;
-            clipboardShapeFormat.font = {
-                name: font.name,
-                size: font.size,
-                color: font.color,
-                bold: font.bold,
-                italic: font.italic
+        // 2. Save TextFrame properties (margins, alignment, auto-fit)
+        if (shape.textFrame) {
+            clipboardShapeFormat.textFrame = {
+                leftMargin: shape.textFrame.leftMargin,
+                rightMargin: shape.textFrame.rightMargin,
+                topMargin: shape.textFrame.topMargin,
+                bottomMargin: shape.textFrame.bottomMargin,
+                verticalAlignment: shape.textFrame.verticalAlignment,
+                autoSizeSetting: shape.textFrame.autoSizeSetting,
+                wordWrap: shape.textFrame.wordWrap
             };
+
+            // 3. Save Font properties if it has text
+            if (shape.textFrame.textRange && shape.textFrame.textRange.font) {
+                const font = shape.textFrame.textRange.font;
+                clipboardShapeFormat.font = {
+                    name: font.name,
+                    size: font.size,
+                    color: font.color,
+                    bold: font.bold,
+                    italic: font.italic
+                };
+            }
         }
 
-        console.log("Format copied to clipboard!");
-    }).catch(error => console.error(error));
+        console.log("Full format (including position and margins) copied!");
+    }).catch(error => console.error("Copy Error: " + error));
 }
 
 async function runPaste() {
@@ -298,6 +315,8 @@ async function runPaste() {
 
     await PowerPoint.run(async (context) => {
         const selectedShapes = context.presentation.getSelectedShapes();
+        
+        // We only need to load the font here so we can overwrite it
         selectedShapes.load("items/textFrame/textRange/font");
         await context.sync();
 
@@ -310,26 +329,41 @@ async function runPaste() {
 
         // Loop through all selected shapes and apply the saved formatting
         selectedShapes.items.forEach(shape => {
-            // Apply dimensions
+            
+            // 1. Apply Position & Dimensions
+            shape.left = clipboardShapeFormat.left;
+            shape.top = clipboardShapeFormat.top;
             shape.width = clipboardShapeFormat.width;
             shape.height = clipboardShapeFormat.height;
 
-            // Apply font properties if they exist in the clipboard AND the target shape has text
-            if (clipboardShapeFormat.font && shape.textFrame && shape.textFrame.textRange) {
-                const targetFont = shape.textFrame.textRange.font;
-                const srcFont = clipboardShapeFormat.font;
-                
-                targetFont.name = srcFont.name;
-                targetFont.size = srcFont.size;
-                targetFont.color = srcFont.color;
-                targetFont.bold = srcFont.bold;
-                targetFont.italic = srcFont.italic;
+            // 2. Apply TextFrame properties
+            if (shape.textFrame && clipboardShapeFormat.textFrame) {
+                const srcFrame = clipboardShapeFormat.textFrame;
+                shape.textFrame.leftMargin = srcFrame.leftMargin;
+                shape.textFrame.rightMargin = srcFrame.rightMargin;
+                shape.textFrame.topMargin = srcFrame.topMargin;
+                shape.textFrame.bottomMargin = srcFrame.bottomMargin;
+                shape.textFrame.verticalAlignment = srcFrame.verticalAlignment;
+                shape.textFrame.autoSizeSetting = srcFrame.autoSizeSetting;
+                shape.textFrame.wordWrap = srcFrame.wordWrap;
+
+                // 3. Apply Font properties
+                if (clipboardShapeFormat.font && shape.textFrame.textRange) {
+                    const targetFont = shape.textFrame.textRange.font;
+                    const srcFont = clipboardShapeFormat.font;
+                    
+                    targetFont.name = srcFont.name;
+                    targetFont.size = srcFont.size;
+                    targetFont.color = srcFont.color;
+                    targetFont.bold = srcFont.bold;
+                    targetFont.italic = srcFont.italic;
+                }
             }
         });
 
         await context.sync();
         console.log("Format pasted successfully!");
-    }).catch(error => console.error(error));
+    }).catch(error => console.error("Paste Error: " + error));
 }
 
 // Handler for the simple space action buttons
