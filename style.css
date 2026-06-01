@@ -195,6 +195,45 @@ button:hover {
     border-bottom: 2px solid #0078d4; 
 }
 
+/* --- TAB NAVIGATION --- */
+.tab-container {
+    display: flex;
+    background-color: #252526;
+    border-bottom: 1px solid #3e3e42;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #cccccc;
+    padding: 12px 0;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 2px solid transparent;
+    
+    /* NEW: Forces Mac to use perfectly sharp, square corners */
+    border-radius: 0;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.tab-btn:hover {
+    color: #ffffff;
+    background-color: #2d2d2d;
+}
+
+.tab-btn.active {
+    color: #ffffff;
+    /* NEW: Official PowerPoint Brand Orange */
+    border-bottom: 2px solid #D24726; 
+}
+
 /* Tab Content Visibility Logic */
 .tab-content {
     display: none;
