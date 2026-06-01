@@ -428,3 +428,19 @@ async function runPowerPointCommand(callback) {
         console.error("Error executing PowerPoint command:", error);
     }
 }
+// --- TAB SWITCHING LOGIC ---
+function switchTab(event, tabId) {
+    // Hide all tab content
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Remove the blue highlight from all buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show the clicked tab and highlight its button
+    document.getElementById(tabId).classList.add('active');
+    event.currentTarget.classList.add('active');
+}
