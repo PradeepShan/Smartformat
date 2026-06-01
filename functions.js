@@ -317,28 +317,60 @@ async function getBase64Image(url) {
 
 async function insertIcon(url, isSwap) {
     console.log(`${isSwap ? 'Swapping' : 'Inserting'} icon...`);
+    
     try {
         const base64Image = await getBase64Image(url);
-        await PowerPoint.run(async (context) => {
-            const slide = context.presentation.getSelectedSlides().getItemAt(0);
-            let insertLeft = 100; let insertTop = 100;
-            
-            if (isSwap) {
+        
+        // DEFAULT: New insertions drop at 100,100 and use the 1.7 cm (ICON_SIZE_PT) size
+        let pLeft = 100; 
+        let pTop = 100;
+        let pWidth = ICON_SIZE_PT;
+        let pHeight = ICON_SIZE_PT;
+        
+        // STEP 1: If it's a swap, grab the old shape's exact position AND size
+        if (isSwap) {
+            await PowerPoint.run(async (context) => {
                 const shapes = context.presentation.getSelectedShapes();
-                shapes.load("items/left, items/top");
+                
+                // Now loading width and height as well
+                shapes.load("items/left, items/top, items/width, items/height");
                 await context.sync();
+                
                 if (shapes.items.length > 0) {
-                    insertLeft = shapes.items[0].left; insertTop = shapes.items[0].top;
+                    // Override the defaults with the old icon's exact footprint
+                    pLeft = shapes.items[0].left; 
+                    pTop = shapes.items[0].top;
+                    pWidth = shapes.items[0].width;
+                    pHeight = shapes.items[0].height;
+                    
                     shapes.items[0].delete(); 
+                    await context.sync();
+                } else {
+                    console.log("No shape selected to swap. Inserting at default 1.7cm.");
+                }
+            });
+        }
+        
+        // STEP 2: Use the Common API to insert with the dynamic dimensions
+        Office.context.document.setSelectedDataAsync(
+            base64Image,
+            { 
+                coercionType: Office.CoercionType.Image, 
+                imageLeft: pLeft, 
+                imageTop: pTop, 
+                imageWidth: pWidth,   // Will be 1.7cm for new, or Old Size for swaps
+                imageHeight: pHeight, // Will be 1.7cm for new, or Old Size for swaps
+                imageAltText: "decorative"
+            },
+            function (asyncResult) {
+                if (asyncResult.status === Office.AsyncResultStatus.Failed) {
+                    console.error("API ERROR: " + asyncResult.error.message);
+                } else {
+                    console.log("SUCCESS: Icon processed successfully!");
                 }
             }
-            
-            const newShape = slide.shapes.addImage(base64Image);
-            newShape.left = insertLeft; newShape.top = insertTop;
-            newShape.width = ICON_SIZE_PT; newShape.height = ICON_SIZE_PT;
-            newShape.description = "decorative"; 
-            
-            await context.sync();
-        });
-    } catch (error) { console.error("Error inserting icon: " + error); }
+        );
+    } catch (error) { 
+        console.error("Error processing icon: " + error); 
+    }
 }
