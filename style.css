@@ -162,3 +162,44 @@ button:hover {
     border-bottom: 1px solid #333;
     padding-bottom: 2px;
 }
+/* --- TAB NAVIGATION --- */
+.tab-container {
+    display: flex;
+    background-color: #252526;
+    border-bottom: 1px solid #3e3e42;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #cccccc;
+    padding: 12px 0;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-bottom: 2px solid transparent;
+}
+
+.tab-btn:hover {
+    color: #ffffff;
+    background-color: #2d2d2d;
+}
+
+.tab-btn.active {
+    color: #ffffff;
+    border-bottom: 2px solid #0078d4; 
+}
+
+/* Tab Content Visibility Logic */
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
