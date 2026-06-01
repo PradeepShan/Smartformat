@@ -1,17 +1,16 @@
-// --- ON-SCREEN CONSOLE OVERRIDE ---
+// ==========================================
+// 1. CONSOLE HIJACK & TAB UI LOGIC
+// ==========================================
 const uiConsole = document.getElementById('on-screen-console');
 
 function printToUI(message, isError = false) {
     if (!uiConsole) return;
-    
     if (typeof message === 'object') {
         try { message = JSON.stringify(message, null, 2); } catch(e) { message = String(message); }
     }
-
     const msgDiv = document.createElement('div');
     msgDiv.className = isError ? 'log-err' : 'log-msg';
     msgDiv.textContent = `> ${message}`;
-    
     uiConsole.appendChild(msgDiv);
     uiConsole.scrollTop = uiConsole.scrollHeight;
 }
@@ -23,424 +22,323 @@ console.log = function(...args) {
     originalLog.apply(console, args);
     printToUI(args.join(' '));
 };
-
 console.error = function(...args) {
     originalError.apply(console, args);
     printToUI(args.join(' '), true);
 };
-// --- END CONSOLE OVERRIDE ---
 
-// Immediate test log to prove the file loaded
-console.log("Functions.js version 2 successfully loaded!");
+// Tab Switcher
+function switchTab(event, tabId) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    event.currentTarget.classList.add('active');
+}
+
+// ==========================================
+// 2. OFFICE.JS INITIALIZATION
+// ==========================================
+console.log("Functions.js loaded successfully.");
 
 Office.onReady((info) => {
     if (info.host === Office.HostType.PowerPoint) {
-        console.log("Office.js is ready. Attaching button events...");
+        console.log("Office.js is ready. Wiring up buttons...");
         
+        // Brand & Formatting
         document.getElementById("btnFixBrand").onclick = runFixBrand;
         document.getElementById("btnZeroMargin").onclick = runZeroMargin;
-        document.getElementById("btn1stLevelBullet").onclick = apply1stLevelBullet;
-        document.getElementById("btn2ndLevelBullet").onclick = apply2ndLevelBullet;
-        // Textbox Properties (Copy / Paste)
+        document.getElementById("btn1stLevelBullet").onclick = runFirstLevelBullet;
+        document.getElementById("btn2ndLevelBullet").onclick = runSecondLevelBullet;
+        
+        // Copy/Paste
         document.getElementById("btnCopy").onclick = runCopy;
         document.getElementById("btnPaste").onclick = runPaste;
-
-// Add this line to your Office.onReady block, replacing the old alignIds array:
-const alignIds = ['btnAlignLeft', 'btnAlignCenterH', 'btnAlignCenterV', 'btnAlignRight', 'btnAlignTop', 'btnAlignBottom', 'btnAlignMiddle'];
-        alignIds.forEach(id => {
-            document.getElementById(id).onclick = () => runAlign(id);
-        });
-
-        // Distribute Buttons
-        const distIds = ['btnDistributeH', 'btnDistributeV', 'btnDistributeSpacingH', 'btnDistributeSpacingV'];
-        distIds.forEach(id => {
-            document.getElementById(id).onclick = () => runDistribute(id);
-        });
         
-        // Listeners for all the space buttons (0, 1x, 2x, etc.)
-        document.querySelectorAll(".space-btn").forEach(btn => {
-            btn.addEventListener('click', handleSpaceButtonClick);
-        });
+        // Alignment
+        const alignIds = ['btnAlignLeft', 'btnAlignCenterH', 'btnAlignCenterV', 'btnAlignRight', 'btnAlignTop', 'btnAlignBottom', 'btnAlignMiddle'];
+        alignIds.forEach(id => { document.getElementById(id).onclick = () => runAlign(id); });
 
-        console.log("SmartFormat Add-in is ready.");
+        // Distribute
+        const distIds = ['btnDistributeH', 'btnDistributeV', 'btnDistributeSpacingH', 'btnDistributeSpacingV'];
+        distIds.forEach(id => { document.getElementById(id).onclick = () => runDistribute(id); });
+
+        // Fallbacks for functions requiring VBA
+        const logVBA = (name) => console.log(`The '${name}' function requires VBA because JS cannot read PowerPoint Theme logic or Text Runs.`);
+        document.getElementById("btnThemeFont").onclick = () => logVBA("Theme Font");
+        document.getElementById("btnThemeColor").onclick = () => logVBA("Theme Color");
+        document.getElementById("btnMerge").onclick = () => logVBA("Merge");
+        document.querySelectorAll(".space-btn").forEach(btn => btn.onclick = () => logVBA("Paragraph Spacing"));
+
+        // Trigger Icon Fetch on first tab click
+        let iconsLoaded = false;
+        document.querySelector('button[onclick="switchTab(event, \'tab-icons\')"]').addEventListener('click', () => {
+            if (!iconsLoaded) {
+                loadIcons();
+                iconsLoaded = true;
+            }
+        });
     }
 });
 
-async function runFixBrand() {
-    await runPowerPointCommand(async (context) => {
-        console.log("Running Fix Brand command...");
-    });
-}
+// ==========================================
+// 3. CORE FORMATTING FUNCTIONS
+// ==========================================
 
 async function runZeroMargin() {
-    console.log("Running Zero Margin...");
     await PowerPoint.run(async (context) => {
-        const selectedShapes = context.presentation.getSelectedShapes();
-        
-        // Load the textFrame properties so we can modify the margins
-        selectedShapes.load("items/textFrame");
+        const shapes = context.presentation.getSelectedShapes();
+        shapes.load("items/textFrame");
         await context.sync();
-
-        if (selectedShapes.items.length === 0) {
-            console.log("No shapes selected. Please select a textbox.");
-            return;
-        }
-
-        selectedShapes.items.forEach(shape => {
+        if (shapes.items.length === 0) return console.log("Select a shape.");
+        shapes.items.forEach(shape => {
             if (shape.textFrame) {
-                // PowerPoint API margins are measured in points
-                shape.textFrame.leftMargin = 0;
-                shape.textFrame.rightMargin = 0;
-                shape.textFrame.topMargin = 0;
-                shape.textFrame.bottomMargin = 0;
+                shape.textFrame.leftMargin = 0; shape.textFrame.rightMargin = 0;
+                shape.textFrame.topMargin = 0; shape.textFrame.bottomMargin = 0;
             }
         });
-
         await context.sync();
-        console.log("Zero margins applied successfully!");
-        
-    }).catch(function (error) {
-        console.error("Error setting margins: " + error);
-    });
-}
-async function apply1stLevelBullet() {
-    await runPowerPointCommand(async (context) => {
-        console.log("Applying 1st Level Bullet...");
+        console.log("Zero margin applied.");
     });
 }
 
-async function apply2ndLevelBullet() {
-    await runPowerPointCommand(async (context) => {
-        console.log("Applying 2nd Level Bullet...");
-    });
-}
-
-
-// --- ALIGNMENT LOGIC ---
-async function runAlign(actionId) {
+async function runFixBrand() {
     await PowerPoint.run(async (context) => {
-        const selectedShapes = context.presentation.getSelectedShapes();
-        selectedShapes.load("items/left, items/top, items/width, items/height");
+        const shapes = context.presentation.getSelectedShapes();
+        shapes.load("items/textFrame/textRange/font");
         await context.sync();
+        if (shapes.items.length === 0) return;
+        shapes.items.forEach(shape => {
+            if (shape.textFrame && shape.textFrame.textRange) {
+                const font = shape.textFrame.textRange.font;
+                font.name = "Montserrat"; // Replace with your brand font
+                font.color = "#0052cc";   // Replace with your brand color
+            }
+        });
+        await context.sync();
+        console.log("Brand formatting applied.");
+    });
+}
 
-        if (selectedShapes.items.length < 2) {
-            console.log("Please select at least 2 shapes to align.");
-            return;
-        }
+async function runFirstLevelBullet() {
+    await PowerPoint.run(async (context) => {
+        const shapes = context.presentation.getSelectedShapes();
+        shapes.load("items/textFrame/textRange/paragraphFormat");
+        await context.sync();
+        shapes.items.forEach(shape => {
+            if (shape.textFrame && shape.textFrame.textRange) {
+                shape.textFrame.textRange.paragraphFormat.bullet.visible = true;
+                shape.textFrame.textRange.paragraphFormat.indentLevel = 0; 
+            }
+        });
+        await context.sync();
+    });
+}
 
-        const shapes = selectedShapes.items;
-        // Key Object is the front-most shape (Z-Index Front)
-        const keyShape = shapes[shapes.length - 1];
+async function runSecondLevelBullet() {
+    await PowerPoint.run(async (context) => {
+        const shapes = context.presentation.getSelectedShapes();
+        shapes.load("items/textFrame/textRange/paragraphFormat");
+        await context.sync();
+        shapes.items.forEach(shape => {
+            if (shape.textFrame && shape.textFrame.textRange) {
+                shape.textFrame.textRange.paragraphFormat.bullet.visible = true;
+                shape.textFrame.textRange.paragraphFormat.indentLevel = 1; 
+            }
+        });
+        await context.sync();
+    });
+}
 
-        console.log(`Aligning to Key Object. Action: ${actionId}`);
-
-        // Loop through all shapes EXCEPT the key shape and align them
-        for (let i = 0; i < shapes.length - 1; i++) {
-            const shape = shapes[i];
-
-            switch (actionId) {
-                case 'btnAlignLeft':
-                    shape.left = keyShape.left;
-                    break;
-                case 'btnAlignRight':
-                    shape.left = keyShape.left + keyShape.width - shape.width;
-                    break;
-                case 'btnAlignTop':
-                    shape.top = keyShape.top;
-                    break;
-                case 'btnAlignBottom':
-                    shape.top = keyShape.top + keyShape.height - shape.height;
-                    break;
-                case 'btnAlignCenterH': // Centers ONLY Horizontally
-                   shape.top = keyShape.top + (keyShape.height / 2) - (shape.height / 2);
-                    break;
-                case 'btnAlignCenterV': // Centers ONLY Vertically
-                     shape.left = keyShape.left + (keyShape.width / 2) - (shape.width / 2);
-                    
-                    break;
-                case 'btnAlignMiddle': // Centers BOTH Horizontally and Vertically
-                    shape.left = keyShape.left + (keyShape.width / 2) - (shape.width / 2);
-                    shape.top = keyShape.top + (keyShape.height / 2) - (shape.height / 2);
-                    break;
+// Copy & Paste Globals
+let clipboardFormat = null;
+async function runCopy() {
+    await PowerPoint.run(async (context) => {
+        const shapes = context.presentation.getSelectedShapes();
+        shapes.load("items/left, items/top, items/width, items/height, items/textFrame/leftMargin, items/textFrame/rightMargin, items/textFrame/topMargin, items/textFrame/bottomMargin, items/textFrame/verticalAlignment, items/textFrame/autoSizeSetting, items/textFrame/wordWrap, items/textFrame/textRange/font");
+        await context.sync();
+        if (shapes.items.length === 0) return console.log("Select a shape to copy.");
+        const shape = shapes.items[0];
+        clipboardFormat = { left: shape.left, top: shape.top, width: shape.width, height: shape.height, textFrame: null, font: null };
+        if (shape.textFrame) {
+            clipboardFormat.textFrame = { leftMargin: shape.textFrame.leftMargin, rightMargin: shape.textFrame.rightMargin, topMargin: shape.textFrame.topMargin, bottomMargin: shape.textFrame.bottomMargin, verticalAlignment: shape.textFrame.verticalAlignment, autoSizeSetting: shape.textFrame.autoSizeSetting, wordWrap: shape.textFrame.wordWrap };
+            if (shape.textFrame.textRange && shape.textFrame.textRange.font) {
+                const f = shape.textFrame.textRange.font;
+                clipboardFormat.font = { name: f.name, size: f.size, color: f.color, bold: f.bold, italic: f.italic };
             }
         }
-
-        await context.sync();
-        console.log("Alignment complete.");
-    }).catch(error => console.error(error));
+        console.log("Format copied!");
+    });
 }
 
-// --- DISTRIBUTE LOGIC ---
+async function runPaste() {
+    if (!clipboardFormat) return console.log("Clipboard empty.");
+    await PowerPoint.run(async (context) => {
+        const shapes = context.presentation.getSelectedShapes();
+        shapes.load("items/textFrame/textRange/font");
+        await context.sync();
+        shapes.items.forEach(shape => {
+            shape.left = clipboardFormat.left; shape.top = clipboardFormat.top;
+            shape.width = clipboardFormat.width; shape.height = clipboardFormat.height;
+            if (shape.textFrame && clipboardFormat.textFrame) {
+                const src = clipboardFormat.textFrame;
+                shape.textFrame.leftMargin = src.leftMargin; shape.textFrame.rightMargin = src.rightMargin;
+                shape.textFrame.topMargin = src.topMargin; shape.textFrame.bottomMargin = src.bottomMargin;
+                shape.textFrame.verticalAlignment = src.verticalAlignment; shape.textFrame.autoSizeSetting = src.autoSizeSetting; shape.textFrame.wordWrap = src.wordWrap;
+                if (clipboardFormat.font && shape.textFrame.textRange) {
+                    const tf = shape.textFrame.textRange.font; const sf = clipboardFormat.font;
+                    tf.name = sf.name; tf.size = sf.size; tf.color = sf.color; tf.bold = sf.bold; tf.italic = sf.italic;
+                }
+            }
+        });
+        await context.sync();
+        console.log("Format pasted!");
+    });
+}
+
+async function runAlign(actionId) {
+    await PowerPoint.run(async (context) => {
+        const shapes = context.presentation.getSelectedShapes();
+        shapes.load("items/left, items/top, items/width, items/height");
+        await context.sync();
+        if (shapes.items.length < 2) return console.log("Select at least 2 shapes.");
+        
+        const keyShape = shapes.items[shapes.items.length - 1]; // Z-Order Top
+        for (let i = 0; i < shapes.items.length - 1; i++) {
+            const shape = shapes.items[i];
+            if (actionId === 'btnAlignLeft') shape.left = keyShape.left;
+            if (actionId === 'btnAlignRight') shape.left = keyShape.left + keyShape.width - shape.width;
+            if (actionId === 'btnAlignTop') shape.top = keyShape.top;
+            if (actionId === 'btnAlignBottom') shape.top = keyShape.top + keyShape.height - shape.height;
+            if (actionId === 'btnAlignCenterH') shape.left = keyShape.left + (keyShape.width / 2) - (shape.width / 2);
+            if (actionId === 'btnAlignCenterV') shape.top = keyShape.top + (keyShape.height / 2) - (shape.height / 2);
+            if (actionId === 'btnAlignMiddle') {
+                shape.left = keyShape.left + (keyShape.width / 2) - (shape.width / 2);
+                shape.top = keyShape.top + (keyShape.height / 2) - (shape.height / 2);
+            }
+        }
+        await context.sync();
+    });
+}
+
 async function runDistribute(actionId) {
     await PowerPoint.run(async (context) => {
         const selectedShapes = context.presentation.getSelectedShapes();
         selectedShapes.load("items/left, items/top, items/width, items/height");
         await context.sync();
-
-        if (selectedShapes.items.length < 3 && (actionId === 'btnDistributeH' || actionId === 'btnDistributeV')) {
-            console.log("Standard Distribute requires at least 3 shapes.");
-            return;
-        }
-
-        // We must copy the API array into a standard array so we can sort it physically
+        
         let shapes = [...selectedShapes.items];
-
-        // 1 cm = 28.3465 points
         const cmToPt = 28.3465;
-        const inputValueCm = parseFloat(document.getElementById("numDistributeValue").value);
-        const exactGapPt = inputValueCm * cmToPt;
+        const exactGapPt = parseFloat(document.getElementById("numDistributeValue").value) * cmToPt;
 
-        console.log(`Running Distribution: ${actionId}`);
-
-        if (actionId === 'btnDistributeH' || actionId === 'btnDistributeSpacingH') {
-            // Sort shapes from Left to Right
+        if (actionId.includes('H')) {
             shapes.sort((a, b) => a.left - b.left);
-
             if (actionId === 'btnDistributeSpacingH') {
-                // Exact Custom Spacing
-                console.log(`Spacing H exactly by ${inputValueCm} cm (${exactGapPt.toFixed(2)} pt)`);
-                for (let i = 1; i < shapes.length; i++) {
-                    shapes[i].left = shapes[i-1].left + shapes[i-1].width + exactGapPt;
-                }
+                for (let i = 1; i < shapes.length; i++) shapes[i].left = shapes[i-1].left + shapes[i-1].width + exactGapPt;
             } else {
-                // Standard Even Distribute between outer bounds
-                let totalShapeWidth = 0;
-                shapes.forEach(s => totalShapeWidth += s.width);
-                
-                const totalSpan = (shapes[shapes.length - 1].left + shapes[shapes.length - 1].width) - shapes[0].left;
-                const emptySpace = totalSpan - totalShapeWidth;
-                const gap = emptySpace / (shapes.length - 1);
-
-                for (let i = 1; i < shapes.length - 1; i++) {
-                    shapes[i].left = shapes[i-1].left + shapes[i-1].width + gap;
-                }
+                let tw = 0; shapes.forEach(s => tw += s.width);
+                const gap = ((shapes[shapes.length - 1].left + shapes[shapes.length - 1].width) - shapes[0].left - tw) / (shapes.length - 1);
+                for (let i = 1; i < shapes.length - 1; i++) shapes[i].left = shapes[i-1].left + shapes[i-1].width + gap;
             }
-        } 
-        else if (actionId === 'btnDistributeV' || actionId === 'btnDistributeSpacingV') {
-            // Sort shapes from Top to Bottom
+        } else {
             shapes.sort((a, b) => a.top - b.top);
-
             if (actionId === 'btnDistributeSpacingV') {
-                // Exact Custom Spacing
-                console.log(`Spacing V exactly by ${inputValueCm} cm (${exactGapPt.toFixed(2)} pt)`);
-                for (let i = 1; i < shapes.length; i++) {
-                    shapes[i].top = shapes[i-1].top + shapes[i-1].height + exactGapPt;
-                }
+                for (let i = 1; i < shapes.length; i++) shapes[i].top = shapes[i-1].top + shapes[i-1].height + exactGapPt;
             } else {
-                // Standard Even Distribute between outer bounds
-                let totalShapeHeight = 0;
-                shapes.forEach(s => totalShapeHeight += s.height);
-                
-                const totalSpan = (shapes[shapes.length - 1].top + shapes[shapes.length - 1].height) - shapes[0].top;
-                const emptySpace = totalSpan - totalShapeHeight;
-                const gap = emptySpace / (shapes.length - 1);
-
-                for (let i = 1; i < shapes.length - 1; i++) {
-                    shapes[i].top = shapes[i-1].top + shapes[i-1].height + gap;
-                }
+                let th = 0; shapes.forEach(s => th += s.height);
+                const gap = ((shapes[shapes.length - 1].top + shapes[shapes.length - 1].height) - shapes[0].top - th) / (shapes.length - 1);
+                for (let i = 1; i < shapes.length - 1; i++) shapes[i].top = shapes[i-1].top + shapes[i-1].height + gap;
             }
         }
-
         await context.sync();
-        console.log("Distribution complete.");
-    }).catch(error => console.error(error));
-
-}
-// --- EXTENDED COPY & PASTE LOGIC ---
-
-// Global variable to hold the copied formatting in memory
-let clipboardShapeFormat = null;
-
-async function runCopy() {
-    await PowerPoint.run(async (context) => {
-        const selectedShapes = context.presentation.getSelectedShapes();
-        
-        // Load ALL the structural properties we need
-        selectedShapes.load("items/left, items/top, items/width, items/height, items/textFrame/leftMargin, items/textFrame/rightMargin, items/textFrame/topMargin, items/textFrame/bottomMargin, items/textFrame/verticalAlignment, items/textFrame/autoSizeSetting, items/textFrame/wordWrap, items/textFrame/textRange/font");
-        
-        await context.sync();
-
-        if (selectedShapes.items.length === 0) {
-            console.log("Please select a shape to copy its format.");
-            return;
-        }
-
-        // We only copy from the first selected shape
-        const shape = selectedShapes.items[0];
-
-        // 1. Save layout and exact position
-        clipboardShapeFormat = {
-            left: shape.left,
-            top: shape.top,
-            width: shape.width,
-            height: shape.height,
-            textFrame: null,
-            font: null
-        };
-
-        // 2. Save TextFrame properties (margins, alignment, auto-fit)
-        if (shape.textFrame) {
-            clipboardShapeFormat.textFrame = {
-                leftMargin: shape.textFrame.leftMargin,
-                rightMargin: shape.textFrame.rightMargin,
-                topMargin: shape.textFrame.topMargin,
-                bottomMargin: shape.textFrame.bottomMargin,
-                verticalAlignment: shape.textFrame.verticalAlignment,
-                autoSizeSetting: shape.textFrame.autoSizeSetting,
-                wordWrap: shape.textFrame.wordWrap
-            };
-
-            // 3. Save Font properties if it has text
-            if (shape.textFrame.textRange && shape.textFrame.textRange.font) {
-                const font = shape.textFrame.textRange.font;
-                clipboardShapeFormat.font = {
-                    name: font.name,
-                    size: font.size,
-                    color: font.color,
-                    bold: font.bold,
-                    italic: font.italic
-                };
-            }
-        }
-
-        console.log("Full format (including position and margins) copied!");
-    }).catch(error => console.error("Copy Error: " + error));
-}
-
-async function runPaste() {
-    if (!clipboardShapeFormat) {
-        console.log("Clipboard is empty. Copy a shape first.");
-        return;
-    }
-
-    await PowerPoint.run(async (context) => {
-        const selectedShapes = context.presentation.getSelectedShapes();
-        
-        // We only need to load the font here so we can overwrite it
-        selectedShapes.load("items/textFrame/textRange/font");
-        await context.sync();
-
-        if (selectedShapes.items.length === 0) {
-            console.log("Select a target shape to paste formatting.");
-            return;
-        }
-
-        console.log("Pasting format to selected shape(s)...");
-
-        // Loop through all selected shapes and apply the saved formatting
-        selectedShapes.items.forEach(shape => {
-            
-            // 1. Apply Position & Dimensions
-            shape.left = clipboardShapeFormat.left;
-            shape.top = clipboardShapeFormat.top;
-            shape.width = clipboardShapeFormat.width;
-            shape.height = clipboardShapeFormat.height;
-
-            // 2. Apply TextFrame properties
-            if (shape.textFrame && clipboardShapeFormat.textFrame) {
-                const srcFrame = clipboardShapeFormat.textFrame;
-                shape.textFrame.leftMargin = srcFrame.leftMargin;
-                shape.textFrame.rightMargin = srcFrame.rightMargin;
-                shape.textFrame.topMargin = srcFrame.topMargin;
-                shape.textFrame.bottomMargin = srcFrame.bottomMargin;
-                shape.textFrame.verticalAlignment = srcFrame.verticalAlignment;
-                shape.textFrame.autoSizeSetting = srcFrame.autoSizeSetting;
-                shape.textFrame.wordWrap = srcFrame.wordWrap;
-
-                // 3. Apply Font properties
-                if (clipboardShapeFormat.font && shape.textFrame.textRange) {
-                    const targetFont = shape.textFrame.textRange.font;
-                    const srcFont = clipboardShapeFormat.font;
-                    
-                    targetFont.name = srcFont.name;
-                    targetFont.size = srcFont.size;
-                    targetFont.color = srcFont.color;
-                    targetFont.bold = srcFont.bold;
-                    targetFont.italic = srcFont.italic;
-                }
-            }
-        });
-
-        await context.sync();
-        console.log("Format pasted successfully!");
-    }).catch(error => console.error("Paste Error: " + error));
-}
-
-// Handler for the simple space action buttons
-// Universal handler for all space buttons (Before & After)
-async function handleSpaceButtonClick(event) {
-    // 1. Identify if the user clicked a "Before" or "After" button
-    const isBefore = event.target.id.includes("btnBefore");
-    const spaceType = isBefore ? "Before" : "After";
-    
-    // 2. Parse the multiplier from the button (e.g., "0" -> 0, "2x" -> 2)
-    const buttonText = event.target.textContent;
-    const multiplier = buttonText === "0" ? 0 : parseFloat(buttonText.replace('x', ''));
-    
-    // 3. Grab the base value from the corresponding input box
-    const inputId = isBefore ? "numBeforeValue" : "numAfterValue";
-    const baseValue = parseFloat(document.getElementById(inputId).value);
-    
-    // 4. Calculate the final space to apply
-    const targetSpace = baseValue * multiplier;
-    console.log(`Applying ${spaceType} Space: ${baseValue} * ${multiplier} = ${targetSpace}pt`);
-
-    // 5. Execute the PowerPoint formatting
-    await PowerPoint.run(async (context) => {
-        // Get whatever the user currently has selected on the slide
-        const selectedShapes = context.presentation.getSelectedShapes();
-        
-        // We must 'load' the specific properties we want to edit before syncing
-        selectedShapes.load("items/textFrame/textRange/paragraphFormat");
-        await context.sync();
-
-        if (selectedShapes.items.length === 0) {
-            console.log("No shapes selected. Please select a textbox.");
-            return;
-        }
-
-        // Loop through all selected shapes and apply the spacing
-        selectedShapes.items.forEach(shape => {
-            // Check if the shape actually contains text
-            if (shape.textFrame) {
-                const paragraphFormat = shape.textFrame.textRange.paragraphFormat;
-                
-                if (isBefore) {
-                    paragraphFormat.spaceBefore = targetSpace;
-                } else {
-                    paragraphFormat.spaceAfter = targetSpace;
-                }
-            }
-        });
-
-        // Sync the changes back to PowerPoint
-        await context.sync();
-        
-    }).catch(function (error) {
-        console.error("Error applying paragraph formatting: " + error);
     });
 }
 
-async function runPowerPointCommand(callback) {
+// ==========================================
+// 4. ICON LIBRARY FETCH & INSERT
+// ==========================================
+const ICON_SIZE_PT = 48.19; 
+
+async function loadIcons() {
+    // ! CHANGE THESE DETAILS TO YOUR PUBLIC GITHUB REPO !
+    const githubUser = "PradeepShan"; 
+    const githubRepo = "Smartformat";
+    const folderPath = "assets"; 
+
+    const apiUrl = `https://api.github.com/repos/${githubUser}/${githubRepo}/contents/${folderPath}`;
+
     try {
-        await PowerPoint.run(callback);
+        console.log("Fetching icon list from GitHub...");
+        const response = await fetch(apiUrl);
+        const files = await response.json();
+        
+        const grid = document.getElementById('iconGrid');
+        grid.innerHTML = ""; 
+        
+        files.forEach(file => {
+            if (file.name.match(/\.(svg|png|jpg|jpeg)$/i)) {
+                const cleanName = file.name.split('.')[0].replace(/_/g, ' ');
+                const div = document.createElement('div');
+                div.className = 'icon-item';
+                div.setAttribute('data-name', cleanName.toLowerCase());
+                
+                div.innerHTML = `
+                    <img src="${file.download_url}" alt="${cleanName}">
+                    <div class="icon-name">${cleanName}</div>
+                `;
+                
+                div.onclick = () => insertIcon(file.download_url, false);
+                div.ondblclick = () => insertIcon(file.download_url, true);
+                grid.appendChild(div);
+            }
+        });
+        console.log("Icons loaded.");
     } catch (error) {
-        console.error("Error executing PowerPoint command:", error);
+        console.error("Icon fetch failed. Is the repo public?", error);
     }
 }
-// --- TAB SWITCHING LOGIC ---
-function switchTab(event, tabId) {
-    // Hide all tab content
-    document.querySelectorAll('.tab-content').forEach(tab => {
-        tab.classList.remove('active');
+
+function filterIcons() {
+    const input = document.getElementById('iconSearchInput').value.toLowerCase();
+    document.querySelectorAll('.icon-item').forEach(item => {
+        item.style.display = item.getAttribute('data-name').includes(input) ? "block" : "none";
     });
-    
-    // Remove the blue highlight from all buttons
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('active');
+}
+
+async function getBase64Image(url) {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result.split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
     });
-    
-    // Show the clicked tab and highlight its button
-    document.getElementById(tabId).classList.add('active');
-    event.currentTarget.classList.add('active');
+}
+
+async function insertIcon(url, isSwap) {
+    console.log(`${isSwap ? 'Swapping' : 'Inserting'} icon...`);
+    try {
+        const base64Image = await getBase64Image(url);
+        await PowerPoint.run(async (context) => {
+            const slide = context.presentation.getSelectedSlides().getItemAt(0);
+            let insertLeft = 100; let insertTop = 100;
+            
+            if (isSwap) {
+                const shapes = context.presentation.getSelectedShapes();
+                shapes.load("items/left, items/top");
+                await context.sync();
+                if (shapes.items.length > 0) {
+                    insertLeft = shapes.items[0].left; insertTop = shapes.items[0].top;
+                    shapes.items[0].delete(); 
+                }
+            }
+            
+            const newShape = slide.shapes.addImage(base64Image);
+            newShape.left = insertLeft; newShape.top = insertTop;
+            newShape.width = ICON_SIZE_PT; newShape.height = ICON_SIZE_PT;
+            newShape.description = "decorative"; 
+            
+            await context.sync();
+        });
+    } catch (error) { console.error("Error inserting icon: " + error); }
 }
