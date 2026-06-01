@@ -1,19 +1,14 @@
+/* --- BASE STYLES --- */
 body {
-    background-color: #1f1f1f;
-    color: #e6e6e6;
-    font-family: 'Segoe UI', system-ui, sans-serif;
+    background-color: #1e1e1e;
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    padding: 12px;
-    
-    display: flex;
-    flex-direction: column;
+    padding: 0;
 }
 
-#content-main {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
+.content-main {
+    padding: 15px;
 }
 
 .header {
@@ -21,178 +16,26 @@ body {
 }
 
 .smartformat-title {
-    font-size: 1rem;
+    font-size: 18px;
     font-weight: 600;
+    color: #ffffff;
     margin: 0;
 }
 
-.command-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
 .section-title {
-    font-size: .75rem;
-    font-weight: 500;
-    margin: 12px 0 8px 0;
-    color: #b3b3b3;
-}
-
-button {
-    background-color: transparent;
-    color: #e6e6e6;
-    border: 1.5px solid #a1a1a1;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 0.75rem;
-    cursor: pointer;
-    text-align: center;
-}
-
-button:hover {
-    border-color: #f1f1f1;
-}
-
-.large-button {
-    width: 100%;
-}
-
-.grid-2x2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #aaaaaa;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
 }
 
 .divider {
     border: 0;
-    border-top: 1px solid #707070;
-    margin: 16px 0;
-    width: 100%;
-}
-
-.icon-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 8px;
-}
-
-.icon-button {
-    padding: 4px;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.icon-button img {
-    max-width: 20px;
-    height: auto;
-}
-
-/* Height synchronization for inputs and buttons */
-.space-control-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    height: 36px;
-}
-
-.button-group {
-    display: flex;
-    gap: 4px;
-    height: 100%;
-}
-
-.space-btn {
-    height: 100%;
-    padding: 0 8px;
-    box-sizing: border-box;
-}
-
-.spinner-container {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    height: 36px;
-}
-
-.num-input {
-    background-color: #1f1f1f;
-    color: white;
-    border: 1px solid #999999;
-    border-radius: 4px;
-    padding: 0 6px;
-    width: 65px; /* Increased from 45px */
-    height: 100%;
-    box-sizing: border-box;
-    text-align: left;
-}
-
-.unit {
-    color: #b3b3b3;
-    font-size: 0.6rem;
-}
-
-/* On-Screen Console Styles */
-#on-screen-console {
-    background-color: #1e1e1e;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 0.75rem;
-    padding: 8px;
-    height: 150px; /* Fixed height with scrolling */
-    overflow-y: auto;
-    border-radius: 4px;
-    border: 1px solid #555555;
-    margin-bottom: 20px;
-    word-wrap: break-word;
-}
-
-.log-msg {
-    color: #cecece;
-    margin-bottom: 4px;
-    border-bottom: 1px solid #333;
-    padding-bottom: 2px;
-}
-
-.log-err {
-    color: #ff6b6b; /* Red for errors */
-    margin-bottom: 4px;
-    border-bottom: 1px solid #333;
-    padding-bottom: 2px;
-}
-/* --- TAB NAVIGATION --- */
-.tab-container {
-    display: flex;
-    background-color: #252526;
-    border-bottom: 1px solid #3e3e42;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-}
-
-.tab-btn {
-    flex: 1;
-    background: transparent;
-    border: none;
-    color: #cccccc;
-    padding: 12px 0;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border-bottom: 2px solid transparent;
-}
-
-.tab-btn:hover {
-    color: #ffffff;
-    background-color: #2d2d2d;
-}
-
-.tab-btn.active {
-    color: #ffffff;
-    border-bottom: 2px solid #0078d4; 
+    height: 1px;
+    background-color: #333333;
+    margin: 20px 0;
 }
 
 /* --- TAB NAVIGATION --- */
@@ -210,14 +53,12 @@ button:hover {
     background: transparent;
     border: none;
     color: #cccccc;
-    padding: 12px 0;
+    padding: 12px 0 16px 0; 
     font-size: 14px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s ease;
     border-bottom: 2px solid transparent;
-    
-    /* NEW: Forces Mac to use perfectly sharp, square corners */
     border-radius: 0;
     -webkit-appearance: none;
     appearance: none;
@@ -230,15 +71,165 @@ button:hover {
 
 .tab-btn.active {
     color: #ffffff;
-    /* NEW: Official PowerPoint Brand Orange */
-    border-bottom: 2px solid #D24726; 
+    border-bottom: 2px solid #D24726; /* PPT Orange */
 }
 
-/* Tab Content Visibility Logic */
-.tab-content {
-    display: none;
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* --- BUTTONS & GRIDS --- */
+button {
+    background-color: #333333;
+    color: white;
+    border: 1px solid #555555;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.2s;
 }
 
-.tab-content.active {
-    display: block;
+button:hover { background-color: #444444; }
+
+.large-button {
+    width: 100%;
+    padding: 12px;
+    font-size: 14px;
+    margin-bottom: 10px;
+    background-color: #0078d4;
+    border-color: #0078d4;
 }
+.large-button:hover { background-color: #005a9e; }
+
+.grid-2x2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.icon-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.icon-button {
+    padding: 6px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.icon-button img {
+    max-width: 100%;
+    max-height: 100%;
+    filter: invert(1);
+}
+
+.space-control-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.button-group {
+    display: flex;
+    gap: 2px;
+}
+.space-btn {
+    padding: 6px 10px;
+}
+
+.spinner-container {
+    display: flex;
+    align-items: center;
+    background-color: #333333;
+    border: 1px solid #555555;
+    border-radius: 4px;
+    padding: 2px 5px;
+}
+.num-input {
+    background: transparent;
+    border: none;
+    color: white;
+    width: 40px;
+    text-align: right;
+    outline: none;
+}
+.unit {
+    color: #888;
+    font-size: 12px;
+    margin-left: 4px;
+}
+
+/* --- BRAND ICON TAB --- */
+.search-container {
+    padding-bottom: 15px;
+    position: sticky;
+    top: 45px;
+    background-color: #1e1e1e;
+    z-index: 10;
+}
+
+#iconSearchInput {
+    width: 90%;
+    padding: 8px 12px;
+    background-color: #333333;
+    border: 1px solid #555555;
+    color: white;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.icon-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    padding-bottom: 20px;
+}
+
+.icon-item {
+    background-color: #333333;
+    border: 1px solid #444444;
+    border-radius: 4px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.icon-item:hover { border-color: #D24726; }
+
+.icon-item img {
+    max-width: 100%;
+    height: 30px;
+    object-fit: contain;
+    margin-bottom: 5px;
+    pointer-events: none;
+}
+
+.icon-name {
+    font-size: 10px;
+    color: #cccccc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- ON-SCREEN CONSOLE --- */
+#on-screen-console {
+    background-color: #111111;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 11px;
+    padding: 8px;
+    height: 120px;
+    overflow-y: auto;
+    border-radius: 4px;
+    border: 1px solid #444;
+    margin-bottom: 20px;
+    word-wrap: break-word;
+}
+.log-msg { color: #aaaaaa; border-bottom: 1px solid #222; padding-bottom: 2px; margin-bottom: 4px; }
+.log-err { color: #ff6b6b; border-bottom: 1px solid #222; padding-bottom: 2px; margin-bottom: 4px; }
