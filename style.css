@@ -183,25 +183,33 @@ button:hover { background-color: #444444; }
     font-size: 14px;
 }
 
+/* --- ICON GRID FIXES --- */
 .icon-grid {
     display: grid;
-    /* CHANGED: Forces exactly 2 columns to prevent horizontal scrolling */
-    grid-template-columns: repeat(2, 1fr); 
+    /* Forces exactly 2 equal columns */
+    grid-template-columns: 1fr 1fr; 
     gap: 10px;
+    width: 100%;
     padding-bottom: 20px;
 }
 
 .icon-item {
-    background-color: #333333;
+    background-color: #cdcdcd;
     border: 1px solid #444444;
     border-radius: 4px;
     padding: 10px;
     text-align: center;
     cursor: pointer;
     transition: border-color 0.2s;
+    
+    /* CRITICAL FIX: Prevents the box from stretching if the text is long */
+    min-width: 0; 
+    overflow: hidden;
 }
 
-.icon-item:hover { border-color: #D24726; }
+.icon-item:hover { 
+    border-color: #D24726; 
+}
 
 .icon-item img {
     max-width: 100%;
@@ -213,10 +221,14 @@ button:hover { background-color: #444444; }
 
 .icon-name {
     font-size: 10px;
-    color: #cccccc;
+    color: #464646;
+    
+    /* CRITICAL FIX: Forces long names to cut off cleanly with "..." */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    width: 100%;
+    display: block;
 }
 
 /* --- ON-SCREEN CONSOLE --- */
