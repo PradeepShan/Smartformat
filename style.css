@@ -185,7 +185,8 @@ button:hover { background-color: #444444; }
 
 .icon-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    /* CHANGED: Forces exactly 2 columns to prevent horizontal scrolling */
+    grid-template-columns: repeat(2, 1fr); 
     gap: 10px;
     padding-bottom: 20px;
 }

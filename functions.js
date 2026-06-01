@@ -321,45 +321,43 @@ async function insertIcon(url, isSwap) {
     try {
         const base64Image = await getBase64Image(url);
         
-        // DEFAULT: New insertions drop at 100,100 and use the 1.7 cm (ICON_SIZE_PT) size
+        // DEFAULT: New insertions drop at 100,100 and use the 1.7 cm (48.19 pt) size
         let pLeft = 100; 
         let pTop = 100;
-        let pWidth = ICON_SIZE_PT;
-        let pHeight = ICON_SIZE_PT;
+        let pWidth = 48.19;
+        let pHeight = 48.19;
         
-        // STEP 1: If it's a swap, grab the old shape's exact position AND size
+        // STEP 1: If swapping, use PowerPoint.run just to grab dimensions and delete
         if (isSwap) {
             await PowerPoint.run(async (context) => {
                 const shapes = context.presentation.getSelectedShapes();
-                
-                // Now loading width and height as well
                 shapes.load("items/left, items/top, items/width, items/height");
                 await context.sync();
                 
                 if (shapes.items.length > 0) {
-                    // Override the defaults with the old icon's exact footprint
-                    pLeft = shapes.items[0].left; 
-                    pTop = shapes.items[0].top;
-                    pWidth = shapes.items[0].width;
-                    pHeight = shapes.items[0].height;
+                    const oldIcon = shapes.items[0];
+                    pLeft = oldIcon.left; 
+                    pTop = oldIcon.top;
+                    pWidth = oldIcon.width;
+                    pHeight = oldIcon.height;
                     
-                    shapes.items[0].delete(); 
+                    oldIcon.delete(); 
                     await context.sync();
                 } else {
-                    console.log("No shape selected to swap. Inserting at default 1.7cm.");
+                    console.log("No shape selected. Inserting at default 1.7cm size.");
                 }
             });
         }
         
-        // STEP 2: Use the Common API to insert with the dynamic dimensions
+        // STEP 2: Use the universally supported Common API for insertion
         Office.context.document.setSelectedDataAsync(
             base64Image,
             { 
                 coercionType: Office.CoercionType.Image, 
                 imageLeft: pLeft, 
                 imageTop: pTop, 
-                imageWidth: pWidth,   // Will be 1.7cm for new, or Old Size for swaps
-                imageHeight: pHeight, // Will be 1.7cm for new, or Old Size for swaps
+                imageWidth: pWidth,   // 1.7cm for new, or exact old size for swaps
+                imageHeight: pHeight, // 1.7cm for new, or exact old size for swaps
                 imageAltText: "decorative"
             },
             function (asyncResult) {
@@ -371,6 +369,6 @@ async function insertIcon(url, isSwap) {
             }
         );
     } catch (error) { 
-        console.error("Error processing icon: " + error); 
+        console.error("Error processing icon: " + error.message); 
     }
 }
