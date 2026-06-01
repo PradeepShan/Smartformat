@@ -286,8 +286,7 @@ async function loadIcons() {
                     <div class="icon-name">${cleanName}</div>
                 `;
                 
-                div.onclick = () => insertIcon(file.download_url, false);
-                div.ondblclick = () => insertIcon(file.download_url, true);
+               div.onclick = () => insertIcon(file.download_url);
                 grid.appendChild(div);
             }
         });
@@ -315,8 +314,8 @@ async function getBase64Image(url) {
     });
 }
 
-async function insertIcon(url, isSwap) {
-    console.log(`${isSwap ? 'Swapping' : 'Inserting'} icon...`);
+async function insertIcon(url) {
+    console.log("Evaluating slide for Insert vs. Swap...");
     
     try {
         const base64Image = await getBase64Image(url);
@@ -326,15 +325,19 @@ async function insertIcon(url, isSwap) {
         let pTop = 100;
         let pWidth = 48.19;
         let pHeight = 48.19;
+        let isSwap = false;
         
-        // STEP 1: If swapping, use PowerPoint.run just to grab dimensions and delete
-        if (isSwap) {
-            await PowerPoint.run(async (context) => {
+        // STEP 1: The "Smart Check" - Does the user have a shape selected?
+        await PowerPoint.run(async (context) => {
+            try {
                 const shapes = context.presentation.getSelectedShapes();
                 shapes.load("items/left, items/top, items/width, items/height");
-                await context.sync();
+                
+                // If NOTHING is selected, this exact line triggers an error and jumps to the 'catch' block below
+                await context.sync(); 
                 
                 if (shapes.items.length > 0) {
+                    isSwap = true;
                     const oldIcon = shapes.items[0];
                     pLeft = oldIcon.left; 
                     pTop = oldIcon.top;
@@ -343,11 +346,15 @@ async function insertIcon(url, isSwap) {
                     
                     oldIcon.delete(); 
                     await context.sync();
-                } else {
-                    console.log("No shape selected. Inserting at default 1.7cm size.");
                 }
-            });
-        }
+            } catch (error) {
+                // We specifically catch the ItemNotFound error here.
+                // It just means the user clicked the slide background. We ignore it and proceed with a fresh insert!
+                console.log("Nothing selected. Defaulting to fresh insert.");
+            }
+        });
+        
+        console.log(isSwap ? "Executing Swap..." : "Executing Fresh Insert...");
         
         // STEP 2: Use the universally supported Common API for insertion
         Office.context.document.setSelectedDataAsync(
@@ -356,8 +363,8 @@ async function insertIcon(url, isSwap) {
                 coercionType: Office.CoercionType.Image, 
                 imageLeft: pLeft, 
                 imageTop: pTop, 
-                imageWidth: pWidth,   // 1.7cm for new, or exact old size for swaps
-                imageHeight: pHeight, // 1.7cm for new, or exact old size for swaps
+                imageWidth: pWidth,   
+                imageHeight: pHeight, 
                 imageAltText: "decorative"
             },
             function (asyncResult) {
@@ -369,6 +376,6 @@ async function insertIcon(url, isSwap) {
             }
         );
     } catch (error) { 
-        console.error("Error processing icon: " + error.message); 
+        console.error("Fatal Error processing icon: " + error.message); 
     }
 }
