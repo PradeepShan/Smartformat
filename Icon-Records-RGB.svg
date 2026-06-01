@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!-- Generator: Adobe Illustrator 28.7.8, SVG Export Plug-In . SVG Version: 9.03 Build 56881)  -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 48 48" style="enable-background:new 0 0 48 48;" xml:space="preserve">
+<g id="white_space">
+</g>
+<g id="Layer_1">
+	<path style="fill:#3D3C38;" d="M37.838,37.959h-2v-2.616c0-1.077-0.849-1.954-1.893-1.954H13.283c-1.043,0-1.893,0.877-1.893,1.954
+		v2.616h-2v-2.616c0-2.181,1.746-3.954,3.893-3.954h20.662c2.146,0,3.893,1.773,3.893,3.954V37.959z"/>
+	<rect x="22.774" y="25.861" style="fill:#3D3C38;" width="2" height="11.354"/>
+	<circle style="fill:#FF612B;" cx="10.391" cy="39.624" r="3.876"/>
+	<g>
+		<g>
+			<polygon style="fill:#FF612B;" points="6.52,29.116 10.335,11.104 42.485,11.123 37.752,29.108 			"/>
+		</g>
+	</g>
+	<g>
+		<circle style="fill:#FF612B;" cx="23.774" cy="39.624" r="3.876"/>
+		<circle style="fill:#FF612B;" cx="36.838" cy="39.624" r="3.876"/>
+		<path style="fill:#3D3C38;" d="M10.335,11.104l26.956,0.016V7.577H17.803c0-1.699-1.378-3.077-3.077-3.077H9.597
+			C7.898,4.5,6.52,5.878,6.52,7.577v21.506l-0.005,0.025H6.52v0.009L10.335,11.104z"/>
+	</g>
+</g>
+</svg>
