@@ -184,15 +184,18 @@ button:hover { background-color: #444444; }
 }
 
 /* --- ICON GRID FIXES --- */
+/* --- ICON GRID (RESPONSIVE FIX) --- */
 .icon-grid {
     display: grid;
-    /* Forces exactly 2 equal columns */
-    grid-template-columns: 1fr 1fr; 
+    
+    /* NEW: Automatically adds columns as the window gets wider */
+    /* It guarantees cards will be at least 110px wide, but will stretch to fill space (1fr) */
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); 
+    
     gap: 10px;
     width: 100%;
     padding-bottom: 20px;
 }
-
 .icon-item {
     background-color: #cdcdcd;
     border: 1px solid #444444;
