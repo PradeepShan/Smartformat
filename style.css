@@ -25,11 +25,11 @@ body {
 
 .section-title {
     font-size: 14px;
-    font-weight: bold;
+    font-weight: Regular;
     color: #aaaaaa;
     margin-top: 20px;
     margin-bottom: 10px;
-    text-transform: uppercase;
+
 }
 
 .divider {
