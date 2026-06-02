@@ -25,7 +25,7 @@ body {
 
 .section-title {
     font-size: 14px;
-    font-weight: Regular;
+    font-weight: Regular; !important
     color: #aaaaaa;
     margin-top: 20px;
     margin-bottom: 10px;
