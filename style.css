@@ -4,7 +4,7 @@ body {
     color: #ffffff;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    padding: 0;
+    padding: 10px;
 }
 
 .content-main {
@@ -20,6 +20,7 @@ body {
     font-weight: 600;
     color: #ffffff;
     margin: 0;
+    padding: 10px 0px;
 }
 
 .section-title {
