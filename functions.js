@@ -209,8 +209,8 @@ async function runAlign(actionId) {
             if (actionId === 'btnAlignRight') shape.left = keyShape.left + keyShape.width - shape.width;
             if (actionId === 'btnAlignTop') shape.top = keyShape.top;
             if (actionId === 'btnAlignBottom') shape.top = keyShape.top + keyShape.height - shape.height;
-            if (actionId === 'btnAlignCenterH') shape.left = keyShape.left + (keyShape.width / 2) - (shape.width / 2);
-            if (actionId === 'btnAlignCenterV') shape.top = keyShape.top + (keyShape.height / 2) - (shape.height / 2);
+            if (actionId === 'btnAlignCenterV') shape.left = keyShape.left + (keyShape.width / 2) - (shape.width / 2);
+            if (actionId === 'btnAlignCenterH') shape.top = keyShape.top + (keyShape.height / 2) - (shape.height / 2);
             if (actionId === 'btnAlignMiddle') {
                 shape.left = keyShape.left + (keyShape.width / 2) - (shape.width / 2);
                 shape.top = keyShape.top + (keyShape.height / 2) - (shape.height / 2);
